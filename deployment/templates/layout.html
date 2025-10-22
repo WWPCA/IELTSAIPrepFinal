@@ -12,6 +12,12 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="recaptcha-site-key" content="{{ config.RECAPTCHA_SITE_KEY }}">
     
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    
     <!-- Google Search Console Verification -->
     <meta name="google-site-verification" content="T3JaxRg2ofkqQmr-eX1IjtVeGF7XZ_YdSO51722tOkY" />
     
@@ -336,6 +342,61 @@
     <!-- Footer -->
     <footer class="site-footer">
         <div class="container">
+            <!-- Trust & Security Section -->
+            <div class="footer-trust-section">
+                <div class="row text-center mb-4">
+                    <div class="col-12">
+                        <h4 class="trust-footer-header">
+                            <i class="fas fa-shield-alt"></i> Trusted & Secure Platform
+                        </h4>
+                    </div>
+                </div>
+                
+                <div class="row text-center mb-4">
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="trust-footer-badge">
+                            <i class="fas fa-lock fa-2x mb-2"></i>
+                            <h6>SSL Encrypted</h6>
+                            <small class="text-muted">256-bit encryption</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="trust-footer-badge">
+                            <i class="fab fa-apple fa-2x mb-2"></i>
+                            <h6>App Store</h6>
+                            <small class="text-muted">Secure payments</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="trust-footer-badge">
+                            <i class="fab fa-google-play fa-2x mb-2"></i>
+                            <h6>Google Play</h6>
+                            <small class="text-muted">Verified payments</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="trust-footer-badge">
+                            <i class="fas fa-user-shield fa-2x mb-2"></i>
+                            <h6>GDPR Compliant</h6>
+                            <small class="text-muted">Data protected</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <p class="trust-footer-certifications">
+                            <small class="text-muted">
+                                <i class="fas fa-check-circle text-success me-1"></i>
+                                Verified by Google Safe Browsing | Norton Safe Web
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <hr class="my-4" style="opacity: 0.1;">
+            
             <div class="footer-grid">
                 <div class="footer-links">
                     <h3>About IELTS AI Prep</h3>
@@ -371,6 +432,61 @@
             </div>
         </div>
     </footer>
+    
+    <style>
+    .footer-trust-section {
+        padding: 30px 0;
+    }
+    
+    .trust-footer-header {
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 1.3rem;
+        margin-bottom: 25px;
+    }
+    
+    .trust-footer-badge {
+        padding: 15px;
+        transition: transform 0.2s;
+    }
+    
+    .trust-footer-badge:hover {
+        transform: translateY(-3px);
+    }
+    
+    .trust-footer-badge i {
+        color: #3498db;
+    }
+    
+    .trust-footer-badge h6 {
+        color: #2c3e50;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin: 8px 0 4px 0;
+    }
+    
+    .trust-footer-badge small {
+        font-size: 0.75rem;
+    }
+    
+    .trust-footer-certifications {
+        margin: 15px 0 0 0;
+    }
+    
+    @media (max-width: 768px) {
+        .trust-footer-header {
+            font-size: 1.1rem;
+        }
+        
+        .trust-footer-badge i {
+            font-size: 1.5rem !important;
+        }
+        
+        .trust-footer-badge h6 {
+            font-size: 0.8rem;
+        }
+    }
+    </style>
     
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
