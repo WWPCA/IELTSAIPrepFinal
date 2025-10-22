@@ -1,0 +1,27 @@
+Contact: mailto:info@ieltsaiprep.com
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://www.ieltsaiprep.com/.well-known/security.txt
+Policy: https://www.ieltsaiprep.com/privacy-policy
+
+# IELTS AI Prep Security Contact
+
+# We take security seriously and appreciate responsible disclosure.
+# If you discover a security vulnerability, please report it to:
+# info@ieltsaiprep.com
+
+# We aim to respond within 48 hours.
+# Please include:
+# - Description of the vulnerability
+# - Steps to reproduce
+# - Potential impact
+# - Your contact information (optional)
+
+# Our security practices:
+# - SSL/TLS encryption via AWS CloudFront
+# - AWS WAF for DDoS protection
+# - Content Security Policy headers
+# - Regular security audits
+# - Secure payment processing via App Store/Google Play
+
+# Thank you for helping us keep IELTS AI Prep secure!
