@@ -1,0 +1,43 @@
+{
+  "category": "audio",
+  "questions": [
+    {
+      "id": "audio-001",
+      "question": "Maya (AI examiner) isn't responding or I can't hear her",
+      "answer": "Let's troubleshoot Maya's audio issues:\n\n**Check Your Setup:**\n1. **Microphone permission:** Ensure your browser has microphone access\n2. **Audio output:** Check that your speakers/headphones are working\n3. **Browser compatibility:** Use Chrome, Safari, or Firefox (latest versions)\n4. **Internet connection:** Speaking tests require stable internet (2+ Mbps)\n\n**During the Test:**\n1. **Speak clearly:** Maya's speech recognition needs clear audio\n2. **Wait for her response:** There may be a 1-2 second delay\n3. **Check the wave or particle globe:** You should see audio levels when Maya speaks\n\n**Still having issues?**\nPlease reply with:\n- Browser type and version\n- Specific error message (if any)\n- Which speaking part (1, 2, or 3)\n\nI'm escalating this to our technical team for immediate investigation.",
+      "keywords": ["maya", "not responding", "can't hear", "no audio", "speaking test", "ai examiner"],
+      "confidence": 0.85,
+      "escalate": true,
+      "escalate_reason": "Maya audio issue - requires technical team investigation of backend services"
+    },
+    {
+      "id": "audio-002",
+      "question": "My microphone isn't working in the speaking test",
+      "answer": "Microphone issues are common but usually easy to fix:\n\n**Browser Permissions:**\n1. **Chrome:** Click the lock icon → Site settings → Microphone → Allow\n2. **Safari:** Safari menu → Preferences → Websites → Microphone → Allow\n3. **Firefox:** Click the mic icon in address bar → Allow\n\n**System Permissions:**\n- **Mac:** System Preferences → Security & Privacy → Microphone → Check your browser\n- **Windows:** Settings → Privacy → Microphone → Allow apps to access microphone\n\n**Test Your Mic:**\n1. Try recording in another app (Voice Memos, etc.)\n2. Check if other video call apps work (Zoom, Google Meet)\n3. Try a different browser\n4. Restart your computer\n\n**Hardware:**\n- Check if your mic is muted (hardware switch/button)\n- Try plugging in external headphones with mic\n- Ensure USB mic is properly connected\n\n**In-Test Indicators:**\n- You should see a green waveform when speaking\n- If red, permissions are denied\n- If flat/silent, mic isn't picking up audio\n\nIf these steps don't help, please provide:\n- Your device (Mac/Windows/other)\n- Browser name and version\n- Screenshot of the error/permission screen",
+      "keywords": ["microphone", "mic not working", "can't speak", "audio input", "recording"],
+      "confidence": 0.90
+    },
+    {
+      "id": "audio-003",
+      "question": "Maya keeps disconnecting during Part 2 or Part 3",
+      "answer": "Disconnections during speaking tests are frustrating! Let's try these solutions:\n\n**Immediate Solutions:**\n1. **Check internet speed:** Minimum 2 Mbps, 5+ Mbps recommended\n2. **Close other apps:** Free up bandwidth and memory\n3. **Restart browser:** Clear memory before starting the test\n4. **Try wired connection:** If on WiFi, connect via ethernet\n\n**Test Recovery:**\n- Your progress is auto-saved\n- If disconnected, your assessment is paused\n- You can resume from where you left off\n- Click 'Resume Assessment' in the app\n\nI'm escalating this to our technical team for investigation. They'll check our systems and get back to you within 24 hours with either:\n- Confirmation that the issue is fixed, with an option to restart your test (either fresh or from where you left off)\n- Verification that everything is working properly on our end, so you can safely resume your test\n\nPlease reply with:\n- Time of disconnection\n- Which part (Part 2 or Part 3)\n- Your internet speed (if you know it)",
+      "keywords": ["disconnecting", "maya disconnects", "connection lost", "part 2", "part 3", "session ended"],
+      "confidence": 0.75,
+      "escalate": true,
+      "escalate_reason": "Disconnection issue - technical team must investigate backend services and offer test restart options"
+    },
+    {
+      "id": "audio-004",
+      "question": "Audio quality is poor or choppy",
+      "answer": "Poor audio quality can affect your speaking assessment. Let's fix it:\n\n**Network Optimization:**\n1. **Check bandwidth:** Run a speed test (speedtest.net)\n   - Minimum: 2 Mbps\n   - Recommended: 5+ Mbps\n2. **Reduce network load:**\n   - Close streaming services (Netflix, YouTube)\n   - Pause downloads/uploads\n   - Disconnect other devices from WiFi\n\n**Audio Settings:**\n1. **Use headphones:** Better than laptop speakers\n2. **External mic:** USB or headset mic is more reliable\n3. **Close position:** Speak 6-12 inches from mic\n4. **Quiet environment:** Background noise affects quality\n\n**Browser Performance:**\n1. **Close extra tabs:** Free up memory\n2. **Update browser:** Use latest version\n3. **Disable extensions:** Especially VPNs, ad blockers\n4. **Try different browser:** Chrome usually performs best\n\nIf quality remains poor after these steps, please let me know and I'll investigate further.",
+      "keywords": ["audio quality", "choppy", "distorted", "static", "poor sound", "laggy"],
+      "confidence": 0.85
+    }
+  ],
+  "template_responses": {
+    "audio_general_help": "Most audio issues are related to browser permissions or internet connectivity. Let's troubleshoot together!",
+    "escalation_technical": "I've escalated this to our technical team. They'll investigate and respond within 24 hours. Ticket ID: {ticket_id}",
+    "test_restart_offer": "Our technical team can restart your test so you can try again once the issue is resolved. Would you prefer to start fresh or resume from where you left off?",
+    "microphone_still_not_working_followup": "I understand this is frustrating. Let me help you get your speaking test completed:\n\n**Test Restart Options:**\nI can reset your speaking assessment so you can try again once your microphone is working. You have two options:\n\n1. **Start Fresh:** Begin a brand new speaking test (recommended if you want a clean slate)\n2. **Resume from Part {part_number}:** Pick up exactly where you left off\n\n**Before You Restart:**\n- Test your mic in another app first (Zoom, Google Meet, Voice Memos)\n- If your mic works in other apps but NOT in our test, please let me know - this could be a technical issue on our end that needs investigation\n\nWhich option would you prefer? I'll reset your test right away.\n\n**Note:** If this is your 2nd or 3rd attempt, or if your microphone works in other apps, I'll also escalate this to our technical team to investigate potential platform issues."
+  }
+}

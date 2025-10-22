@@ -1,0 +1,184 @@
+═══════════════════════════════════════════════════════════════
+LINKEDIN COMPANY PAGE SETUP GUIDE
+Complete Content Template for IELTS AI Prep
+═══════════════════════════════════════════════════════════════
+
+HOW TO CREATE YOUR LINKEDIN COMPANY PAGE:
+
+1. Log into your personal LinkedIn account
+2. Click the "Work" icon (grid of 9 dots) in the top right
+3. Select "Create a Company Page"
+4. Choose "Company" (not Showcase Page or Educational Institution)
+5. Fill in the information below
+
+═══════════════════════════════════════════════════════════════
+
+BASIC INFORMATION:
+
+Company Name*:
+IELTS AI Prep
+
+LinkedIn Public URL*:
+linkedin.com/company/ielts-ai-prep
+(LinkedIn will suggest this based on your company name)
+
+Website*:
+https://www.ieltsaiprep.com
+
+Industry*:
+E-Learning Providers
+(or "Education Technology")
+
+Company Size*:
+1-10 employees
+(Choose the appropriate size)
+
+Company Type*:
+Privately Held
+
+Tagline (120 characters):
+AI-powered IELTS preparation with instant band-aligned feedback for Writing and Speaking
+
+═══════════════════════════════════════════════════════════════
+
+COMPANY DESCRIPTION (2000 character limit):
+
+IELTS AI Prep is revolutionizing IELTS test preparation through advanced artificial intelligence technology. We provide students worldwide with instant, examiner-aligned band scores and detailed feedback for IELTS Writing and Speaking assessments.
+
+Our Mission:
+To democratize access to high-quality IELTS preparation by delivering professional-grade assessment and feedback through innovative AI technology.
+
+What We Offer:
+
+✓ TrueScore® Technology – Proprietary AI engine that evaluates IELTS Writing tasks against official band descriptors, analyzing Task Achievement, Coherence & Cohesion, Lexical Resource, and Grammatical Range & Accuracy
+
+✓ ClearScore® Evaluation – Advanced speech-to-speech AI system for Speaking assessments, providing real-time analysis of Fluency & Coherence, Lexical Resource, Grammatical Range & Accuracy, and Pronunciation
+
+✓ Instant Feedback – Students receive detailed band scores and actionable improvement suggestions within moments of completing assessments
+
+✓ Authentic Test Experience – Platform replicates official IELTS examination format for both Academic and General Training modules
+
+✓ Mobile-First Design – Seamless experience across web and mobile platforms for flexible learning
+
+Why Choose IELTS AI Prep:
+
+• Standardized scoring aligned with official IELTS criteria
+• Affordable alternative to expensive tutoring
+• Available 24/7 from anywhere in the world
+• Immediate results and personalized feedback
+• Practice as many times as needed to build confidence
+
+Technology:
+Our hybrid cloud architecture combines AWS infrastructure with advanced Google AI services, optimized for global performance and cost efficiency.
+
+Join thousands of students worldwide who are achieving their IELTS goals with AI-powered preparation.
+
+Visit us at www.ieltsaiprep.com
+
+═══════════════════════════════════════════════════════════════
+
+SPECIALTIES (Separate with commas):
+
+IELTS preparation, AI-powered assessment, educational technology, language learning, test preparation, writing assessment, speaking assessment, band score evaluation, IELTS Academic, IELTS General Training, artificial intelligence, educational software, online learning, e-learning
+
+═══════════════════════════════════════════════════════════════
+
+COMPANY DETAILS:
+
+Founded:
+2024 (or your actual founding year)
+
+Headquarters:
+[Your City, State/Province, Country]
+
+Company Email:
+info@ieltsaiprep.com
+
+═══════════════════════════════════════════════════════════════
+
+LOGO & COVER IMAGE:
+
+Profile Image (Logo):
+→ Upload: /static/images/app-icon.png (300x300px minimum)
+→ Square format required
+
+Cover Image (Banner):
+→ Recommended size: 1128 x 191 pixels
+→ Should showcase your brand
+→ Include tagline or key value proposition
+
+═══════════════════════════════════════════════════════════════
+
+FIRST POST IDEAS (Post immediately after creating page):
+
+Post 1 - Company Launch:
+"🎉 We're excited to announce the launch of IELTS AI Prep!
+
+Our AI-powered platform delivers instant, examiner-aligned band scores for IELTS Writing and Speaking assessments. 
+
+What makes us different:
+✓ Instant feedback using official IELTS criteria
+✓ Affordable, accessible 24/7
+✓ Real-time Speaking practice with AI examiner
+✓ Detailed improvement suggestions
+
+Ready to achieve your target band score? Visit www.ieltsaiprep.com
+
+#IELTS #EdTech #AI #LanguageLearning #TestPrep"
+
+Post 2 - Problem/Solution:
+"📊 Did you know that traditional IELTS tutoring can cost $50-100 per hour?
+
+At IELTS AI Prep, we're making professional-grade IELTS preparation accessible to everyone through AI technology.
+
+Get instant band-aligned feedback for a fraction of the cost of traditional tutoring.
+
+Learn more: www.ieltsaiprep.com
+
+#IELTSPrep #AffordableEducation #EdTech"
+
+Post 3 - Technology Focus:
+"🤖 How does AI assess your IELTS Speaking?
+
+Our ClearScore® technology uses advanced speech-to-speech AI to evaluate your performance against official IELTS criteria:
+
+• Fluency & Coherence
+• Lexical Resource  
+• Grammatical Range & Accuracy
+• Pronunciation
+
+Practice with an AI examiner anytime, anywhere.
+
+#IELTS #ArtificialIntelligence #LanguageLearning"
+
+═══════════════════════════════════════════════════════════════
+
+AFTER PAGE IS CREATED:
+
+1. Add Products/Services section:
+   → IELTS Writing Assessment (Academic & General)
+   → IELTS Speaking Assessment (Academic & General)
+
+2. Invite employees to follow/join
+
+3. Post regularly (2-3 times per week)
+
+4. Engage with IELTS and EdTech communities
+
+5. Use relevant hashtags: #IELTS #EdTech #AI #LanguageLearning
+
+6. Share your page on your personal profile
+
+7. Add the LinkedIn badge to your website
+
+═══════════════════════════════════════════════════════════════
+
+SAVE YOUR LINKEDIN COMPANY ID:
+
+After creating the page, find your Company ID:
+→ Go to your company page
+→ Look at the URL: linkedin.com/company/ielts-ai-prep
+→ Or click "Admin tools" → "Manage page" to find the numeric ID
+→ Save this ID for your Wikidata entry!
+
+═══════════════════════════════════════════════════════════════

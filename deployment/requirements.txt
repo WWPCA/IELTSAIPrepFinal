@@ -1,0 +1,26 @@
+aws-wsgi
+flask
+werkzeug
+flask-cors
+flask-login
+pyjwt
+bcrypt
+
+# Google Cloud / Vertex AI for Gemini Live API
+google-cloud-aiplatform==1.42.1
+google-auth==2.27.0
+google-genai==0.2.2
+google-api-core==2.15.0
+googleapis-common-protos==1.62.0
+
+# Protocol Buffers (required by Google SDKs)
+protobuf==4.25.2
+grpcio==1.60.0
+grpcio-status==1.60.0
+
+# Async support for WebSocket streaming
+aiohttp==3.9.3
+
+# AWS SDK (already included but listing for completeness)
+boto3==1.34.34
+botocore==1.34.34

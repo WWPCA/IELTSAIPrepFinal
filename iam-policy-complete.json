@@ -1,0 +1,390 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "LambdaFullAccess",
+            "Effect": "Allow",
+            "Action": "lambda:*",
+            "Resource": [
+                "arn:aws:lambda:*:*:function:ielts-*",
+                "arn:aws:lambda:*:*:function:*-ielts-*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "DynamoDBFullAccess",
+            "Effect": "Allow",
+            "Action": "dynamodb:*",
+            "Resource": [
+                "arn:aws:dynamodb:*:*:table/ielts-*",
+                "arn:aws:dynamodb:*:*:table/ielts-*/index/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "APIGatewayFullAccess",
+            "Effect": "Allow",
+            "Action": "apigateway:*",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "S3FullAccess",
+            "Effect": "Allow",
+            "Action": "s3:*",
+            "Resource": [
+                "arn:aws:s3:::ielts-*",
+                "arn:aws:s3:::ielts-*/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "SESFullAccess",
+            "Effect": "Allow",
+            "Action": "ses:*",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "CloudFrontFullAccess",
+            "Effect": "Allow",
+            "Action": "cloudfront:*",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "Route53FullAccess",
+            "Effect": "Allow",
+            "Action": [
+                "route53:*",
+                "route53domains:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "ACMFullAccess",
+            "Effect": "Allow",
+            "Action": "acm:*",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "CloudWatchLogsFullAccess",
+            "Effect": "Allow",
+            "Action": [
+                "logs:*",
+                "cloudwatch:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "KMSAccess",
+            "Effect": "Allow",
+            "Action": [
+                "kms:Create*",
+                "kms:Describe*",
+                "kms:Enable*",
+                "kms:List*",
+                "kms:Put*",
+                "kms:Update*",
+                "kms:Revoke*",
+                "kms:Disable*",
+                "kms:Get*",
+                "kms:Delete*",
+                "kms:ScheduleKeyDeletion",
+                "kms:CancelKeyDeletion",
+                "kms:Encrypt",
+                "kms:Decrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "BedrockNovaMicroOnly",
+            "Effect": "Allow",
+            "Action": [
+                "bedrock:InvokeModel",
+                "bedrock:InvokeModelWithResponseStream"
+            ],
+            "Resource": "arn:aws:bedrock:*::foundation-model/amazon.nova-micro-v1:0",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "BedrockReadOnly",
+            "Effect": "Allow",
+            "Action": [
+                "bedrock:GetFoundationModel",
+                "bedrock:ListFoundationModels",
+                "bedrock:GetModelInvocationLoggingConfiguration",
+                "bedrock:PutModelInvocationLoggingConfiguration"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "CloudFormationFullAccess",
+            "Effect": "Allow",
+            "Action": "cloudformation:*",
+            "Resource": [
+                "arn:aws:cloudformation:*:*:stack/ielts-*/*",
+                "arn:aws:cloudformation:*:*:stack/*-ielts-*/*",
+                "arn:aws:cloudformation:*:*:stackset/ielts-*:*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "ElastiCacheFullAccess",
+            "Effect": "Allow",
+            "Action": "elasticache:*",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "AutoScalingFullAccess",
+            "Effect": "Allow",
+            "Action": [
+                "application-autoscaling:*",
+                "autoscaling:*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "CognitoFullAccess",
+            "Effect": "Allow",
+            "Action": "cognito-idp:*",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "SNSFullAccess",
+            "Effect": "Allow",
+            "Action": "sns:*",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "TranscribeAccess",
+            "Effect": "Allow",
+            "Action": [
+                "transcribe:StartTranscriptionJob",
+                "transcribe:GetTranscriptionJob",
+                "transcribe:ListTranscriptionJobs",
+                "transcribe:DeleteTranscriptionJob"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "EC2ReadAccess",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeVpcs",
+                "ec2:DescribeRegions",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeSecurityGroups"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "IAMLimitedAccess",
+            "Effect": "Allow",
+            "Action": [
+                "iam:GetRole",
+                "iam:GetRolePolicy",
+                "iam:ListRoles",
+                "iam:ListRolePolicies",
+                "iam:ListAttachedRolePolicies",
+                "iam:PassRole",
+                "iam:CreateRole",
+                "iam:AttachRolePolicy",
+                "iam:DetachRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:DeleteRolePolicy",
+                "iam:CreateServiceLinkedRole",
+                "iam:GetUser",
+                "iam:GetPolicy",
+                "iam:GetPolicyVersion",
+                "iam:ListPolicies",
+                "iam:CreatePolicy",
+                "iam:ListPolicyVersions",
+                "iam:ChangePassword"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "SecretsManagerForGemini",
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:CreateSecret",
+                "secretsmanager:UpdateSecret",
+                "secretsmanager:DescribeSecret",
+                "secretsmanager:PutSecretValue",
+                "secretsmanager:ListSecrets",
+                "secretsmanager:TagResource"
+            ],
+            "Resource": [
+                "arn:aws:secretsmanager:*:*:secret:gemini-vertex-ai-credentials-*",
+                "arn:aws:secretsmanager:*:*:secret:ielts-*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "SystemsManagerForConfig",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:GetParametersByPath",
+                "ssm:PutParameter",
+                "ssm:DeleteParameter",
+                "ssm:DescribeParameters",
+                "ssm:AddTagsToResource"
+            ],
+            "Resource": [
+                "arn:aws:ssm:*:*:parameter/ielts/*",
+                "arn:aws:ssm:*:*:parameter/gemini/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "SAMCLISupport",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:CreateChangeSet",
+                "cloudformation:ExecuteChangeSet",
+                "cloudformation:DescribeChangeSet",
+                "cloudformation:DescribeStackEvents",
+                "cloudformation:DescribeStacks",
+                "cloudformation:GetTemplate",
+                "cloudformation:ListStackResources",
+                "cloudformation:ValidateTemplate"
+            ],
+            "Resource": [
+                "arn:aws:cloudformation:*:*:stack/aws-sam-cli-managed-default/*",
+                "arn:aws:cloudformation:*:aws:transform/Serverless-2016-10-31"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "WWP"
+                }
+            }
+        },
+        {
+            "Sid": "DenyProductionDeletion",
+            "Effect": "Deny",
+            "Action": [
+                "dynamodb:DeleteTable",
+                "s3:DeleteBucket",
+                "lambda:DeleteFunction",
+                "cloudformation:DeleteStack"
+            ],
+            "Resource": [
+                "arn:aws:dynamodb:*:*:table/ielts-genai-prep-*-production",
+                "arn:aws:dynamodb:*:*:table/*-production",
+                "arn:aws:s3:::ielts-*-production",
+                "arn:aws:s3:::*-production",
+                "arn:aws:lambda:*:*:function:production-ielts-*",
+                "arn:aws:lambda:*:*:function:*-production",
+                "arn:aws:cloudformation:*:*:stack/ielts-*-production/*",
+                "arn:aws:cloudformation:*:*:stack/*-production/*"
+            ]
+        }
+    ]
+}

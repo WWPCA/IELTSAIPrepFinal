@@ -1,0 +1,58 @@
+{
+  "category": "refund",
+  "questions": [
+    {
+      "id": "refund-001",
+      "question": "Can I get a refund?",
+      "answer": "Thank you for reaching out. As stated in our Terms and Conditions, **all sales are final and we do not offer refunds**.\n\nHowever, we're committed to ensuring you get the full value of your purchase. If you're experiencing technical issues preventing you from using your assessment, we will fix the problem and allow you to retry.\n\n**Please tell me:**\n- What specific issue are you experiencing?\n- When did this happen?\n- What were you trying to do?\n\nOnce I understand the problem, I'll escalate to our technical team to resolve it on a priority basis.",
+      "keywords": ["refund", "money back", "cancel", "return", "get refund"],
+      "confidence": 0.95,
+      "escalate": false,
+      "policy_reference": "Terms and Conditions - No Refund Policy"
+    },
+    {
+      "id": "refund-002",
+      "question": "The service didn't work, I want my money back",
+      "answer": "I'm very sorry to hear you had a bad experience. I understand your frustration.\n\n**Our Policy:**\nAs outlined in our Terms and Conditions, we do not offer refunds. However, **we absolutely want you to be able to use what you paid for**.\n\nWe will fix the technical issue and allow you to retry your assessment.\n\n**Please help me understand what happened:**\n- What specifically went wrong?\n- When did this occur? (date and time)\n- Were there any error messages?\n\nI'm escalating this to our technical team right now as a priority. We'll investigate immediately and get back to you within 24 hours with a resolution.\n\n**Ticket ID: {ticket_id}**",
+      "keywords": ["didn't work", "not working", "broken", "terrible", "worst", "scam", "fraud", "waste of money"],
+      "confidence": 0.90,
+      "escalate": true,
+      "priority": "urgent",
+      "escalate_reason": "Service failure requiring immediate technical investigation and customer retention"
+    },
+    {
+      "id": "refund-003",
+      "question": "I accidentally purchased the wrong assessment",
+      "answer": "I understand this was an accidental purchase.\n\n**Our Policy:**\nAs stated in our Terms and Conditions, all sales are final and refunds are not available.\n\nYour purchase is valid for 30 days, and you can still benefit from the assessment you bought. All our assessments provide valuable IELTS preparation.\n\n**For your next purchase:**\n- Please review the assessment type carefully before confirming\n- Contact us if you're unsure which assessment you need\n- We're here to help guide you to the right choice\n\nIs there anything else I can help you with?",
+      "keywords": ["accidental", "wrong purchase", "bought wrong", "mistake"],
+      "confidence": 0.85,
+      "escalate": false
+    },
+    {
+      "id": "refund-004",
+      "question": "This is unfair, I deserve a refund",
+      "answer": "I understand you're upset, and I sincerely apologize for your negative experience.\n\n**Our Commitment:**\nWhile our Terms and Conditions state that all sales are final, we are absolutely committed to delivering the service you paid for.\n\n**We are working on fixing this on a priority basis.**\n\n**Please tell me:**\n- What specifically didn't work as expected?\n- What were you trying to do when the problem occurred?\n- Do you have any screenshots or error messages?\n\nI'm escalating this to our senior technical team right now with URGENT priority. They will personally ensure your issue is resolved within 24 hours, and you'll be able to retry your assessment.\n\n**Ticket ID: {ticket_id}**\n\nYour satisfaction matters to us, and we will make this right by fixing the issue.",
+      "keywords": ["unfair", "deserve refund", "not fair", "this is wrong", "rip off"],
+      "confidence": 0.85,
+      "escalate": true,
+      "priority": "urgent",
+      "escalate_reason": "Angry customer requiring senior support and immediate technical resolution"
+    }
+  ],
+  "refund_policy": {
+    "official_policy": "All sales are final. No refunds are offered as stated in Terms and Conditions.",
+    "technical_issues_policy": "If technical issues prevent service use, we will fix the issue and allow the user to retry at no additional cost.",
+    "company_commitments": [
+      "Fix all technical issues within 24 hours",
+      "Provide ability to retry if technical failure occurs",
+      "Extend access period if time lost due to our technical issues",
+      "Provide technical support throughout 30-day access period"
+    ]
+  },
+  "template_responses": {
+    "no_refund_policy": "As stated in our Terms and Conditions, all sales are final and we do not offer refunds. However, if you're experiencing technical issues, we will fix them and allow you to retry your assessment.",
+    "ask_for_details": "Please tell me what specific issue you're experiencing so I can escalate to our technical team to resolve it on a priority basis.",
+    "technical_issue_resolution": "We are working on fixing this on a priority basis. I've escalated your issue to our technical team. We'll resolve the problem within 24 hours and notify you when you can retry your assessment. Ticket ID: {ticket_id}",
+    "angry_customer_escalation": "I've escalated this to our senior technical team with URGENT priority. We are working on fixing this on a priority basis. They will personally ensure your issue is resolved. Ticket ID: {ticket_id}"
+  }
+}

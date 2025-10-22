@@ -1,0 +1,41 @@
+{
+  "category": "purchase",
+  "questions": [
+    {
+      "id": "purchase-001",
+      "question": "How do I purchase an IELTS assessment?",
+      "answer": "IELTS AI Prep uses a mobile-first purchase model. All purchases are made exclusively through the Apple App Store (iOS) or Google Play Store (Android). Here's how:\n\n1. Download the IELTS AI Prep app from your app store\n2. Create an account or sign in\n3. Browse available assessments:\n   - Writing/Speaking modules ($25 for 2 assessments)\n   - Full-Length Mock Tests ($99 for 2 complete exams)\n4. Purchase through in-app purchases\n5. Scan the QR code to access your assessment on the web platform\n\nWe do not accept direct payments on the website. All purchases must be made through the mobile app.",
+      "keywords": ["buy", "purchase", "how to buy", "payment", "cost", "price"],
+      "confidence": 0.95
+    },
+    {
+      "id": "purchase-002",
+      "question": "What payment methods do you accept?",
+      "answer": "We accept all payment methods supported by Apple App Store and Google Play Store, including:\n\n- Credit/Debit cards (Visa, Mastercard, American Express)\n- Apple Pay (iOS)\n- Google Pay (Android)\n- Store credit or gift cards\n- PayPal (where supported)\n\nPayment processing is handled securely by Apple and Google. We never have direct access to your payment information.",
+      "keywords": ["payment method", "credit card", "paypal", "apple pay", "google pay"],
+      "confidence": 0.95
+    },
+    {
+      "id": "purchase-003",
+      "question": "How much do assessments cost?",
+      "answer": "IELTS AI Prep offers individual modules and full-length mock tests:\n\n**Writing & Speaking Modules** - $25 for 2 assessments\n\n**Academic Writing:**\n- Tasks 1 & 2 for Academic IELTS\n- AI-powered evaluation and band score\n- Detailed improvement plan\n- 2 unique assessments included\n\n**Academic Speaking:**\n- Real-time conversation with Maya (AI examiner)\n- All three parts of IELTS Academic speaking test\n- Detailed pronunciation and fluency feedback\n- 2 unique assessments included\n\n**General Writing:**\n- Tasks 1 & 2 for General Training IELTS\n- AI-powered band score breakdown\n- Personalized feedback\n- 2 unique assessments included\n\n**General Speaking:**\n- Real-time speaking practice with Maya\n- All three parts of IELTS General speaking test\n- Comprehensive feedback\n- 2 unique assessments included\n\n**Full-Length Mock Tests** - $99 for 2 complete exams\n\n**Academic Mock Test:**\n- Complete IELTS Academic simulation\n- Listening, Reading, Writing, Speaking\n- Comprehensive band score report\n- 2 full-length tests included\n\n**General Training Mock Test:**\n- Complete IELTS General simulation\n- Listening, Reading, Writing, Speaking\n- Comprehensive band score report\n- 2 full-length tests included\n\nAll prices are in USD and may vary by region based on App Store/Play Store pricing.",
+      "keywords": ["price", "cost", "how much", "pricing", "fee"],
+      "confidence": 0.95
+    },
+    {
+      "id": "purchase-004",
+      "question": "I was charged but didn't receive my assessment",
+      "answer": "I'm sorry to hear that! This is usually a temporary sync issue. Please try these steps:\n\n1. **Close and reopen the app** - This refreshes your purchase status\n2. **Check your email** - You should have received a purchase confirmation\n3. **Tap 'Restore Purchases'** in the app settings\n4. **Wait 5-10 minutes** - Sometimes it takes a few minutes for the purchase to sync\n\nIf you still don't see your assessment after trying these steps, please reply with:\n- Your email address\n- Screenshot of the App Store/Play Store receipt\n- Device type (iPhone/Android)\n\nI'll escalate this to our technical team immediately to ensure you get access within 24 hours.",
+      "keywords": ["charged", "didn't receive", "no access", "purchase failed", "missing"],
+      "confidence": 0.85,
+      "escalate": true,
+      "escalate_reason": "Potential purchase issue requiring manual verification"
+    }
+  ],
+  "template_responses": {
+    "general_purchase_inquiry": "Thank you for your interest in IELTS AI Prep! All purchases are made through our mobile app (iOS/Android). Once purchased, you can access your assessment on both mobile and web using our QR code bridge. Is there a specific assessment type you're interested in?",
+    "price_inquiry": "Writing/Speaking modules cost $25 for 2 assessments. Full-Length Mock Tests cost $99 for 2 complete exams. All prices are in USD and may vary by region based on App Store/Play Store pricing.",
+    "escalation_message": "I've escalated your issue to our technical team. You should receive a response within 24 hours. Your ticket ID is: {ticket_id}",
+    "purchase_verification_followup": "Our technical team has verified your purchase. Your assessment is now available in your account. Please check your email for access instructions. If you still need help, let me know!"
+  }
+}

@@ -1,0 +1,25 @@
+[MASTER]
+ignore=.git,__pycache__,.aws-sam,node_modules,.cache,.pythonlibs
+jobs=4
+
+[MESSAGES CONTROL]
+disable=
+    C0103,  # Invalid name
+    C0114,  # Missing module docstring
+    C0115,  # Missing class docstring
+    C0116,  # Missing function docstring
+    R0913,  # Too many arguments
+    R0914,  # Too many local variables
+    W0703,  # Catching too general exception
+    E1101,  # No member (false positives with Flask)
+
+[FORMAT]
+max-line-length=120
+indent-string='    '
+
+[BASIC]
+good-names=i,j,k,db,app,id
+
+[DESIGN]
+max-attributes=12
+max-parents=10

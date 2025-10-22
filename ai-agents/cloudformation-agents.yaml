@@ -1,0 +1,355 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'IELTS AI Prep - AI Agents Infrastructure (Customer Support + DevOps)'
+
+Parameters:
+  EscalationEmail:
+    Type: String
+    Description: Email address for escalated tickets and manual reviews
+    Default: your-email@example.com
+  
+  SupportEmail:
+    Type: String
+    Description: Support email address (info@ieltsaiprep.com for customer support)
+    Default: info@ieltsaiprep.com
+  
+  BedrockKBIdCustomerSupport:
+    Type: String
+    Description: Bedrock Knowledge Base ID for customer FAQs
+  
+  BedrockKBIdDevOps:
+    Type: String
+    Description: Bedrock Knowledge Base ID for architecture docs
+
+Resources:
+  # ===== DynamoDB Tables =====
+  
+  SupportTicketsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ielts-support-tickets
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: ticket_id
+          AttributeType: S
+        - AttributeName: created_at
+          AttributeType: N
+        - AttributeName: status
+          AttributeType: S
+        - AttributeName: priority
+          AttributeType: S
+        - AttributeName: user_email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: ticket_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: status-created_at-index
+          KeySchema:
+            - AttributeName: status
+              KeyType: HASH
+            - AttributeName: created_at
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: priority-created_at-index
+          KeySchema:
+            - AttributeName: priority
+              KeyType: HASH
+            - AttributeName: created_at
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: user_email-created_at-index
+          KeySchema:
+            - AttributeName: user_email
+              KeyType: HASH
+            - AttributeName: created_at
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      StreamSpecification:
+        StreamEnabled: true
+        StreamViewType: NEW_AND_OLD_IMAGES
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: Project
+          Value: IELTS-AI-Prep
+        - Key: Component
+          Value: Customer-Support-Agent
+  
+  DevOpsActionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ielts-devops-actions
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: action_id
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+        - AttributeName: status
+          AttributeType: S
+        - AttributeName: affected_service
+          AttributeType: S
+        - AttributeName: ticket_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: action_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: status-timestamp-index
+          KeySchema:
+            - AttributeName: status
+              KeyType: HASH
+            - AttributeName: timestamp
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: affected_service-timestamp-index
+          KeySchema:
+            - AttributeName: affected_service
+              KeyType: HASH
+            - AttributeName: timestamp
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: ticket_id-timestamp-index
+          KeySchema:
+            - AttributeName: ticket_id
+              KeyType: HASH
+            - AttributeName: timestamp
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      StreamSpecification:
+        StreamEnabled: true
+        StreamViewType: NEW_AND_OLD_IMAGES
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: Project
+          Value: IELTS-AI-Prep
+        - Key: Component
+          Value: DevOps-Agent
+
+  # ===== SNS Topics =====
+  
+  DevOpsEscalationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: ielts-devops-technical-escalations
+      DisplayName: IELTS DevOps Agent Technical Escalations
+      Subscription:
+        - Endpoint: !GetAtt DevOpsAgentFunction.Arn
+          Protocol: lambda
+
+  # ===== Lambda Functions =====
+  
+  CustomerSupportFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ielts-customer-support-agent
+      Handler: lambda_customer_support.lambda_handler
+      Runtime: python3.11
+      CodeUri: .
+      MemorySize: 512
+      Timeout: 120
+      Environment:
+        Variables:
+          KNOWLEDGE_BASE_ID: !Ref BedrockKBIdCustomerSupport
+          MODEL_ID_MICRO: amazon.nova-micro-v1:0
+          MODEL_ID_PRO: amazon.nova-pro-v1:0
+          SUPPORT_EMAIL: !Ref SupportEmail
+          ESCALATION_EMAIL: !Ref EscalationEmail
+          DYNAMODB_TICKETS_TABLE: !Ref SupportTicketsTable
+          SNS_TOPIC_DEVOPS: !Ref DevOpsEscalationTopic
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SupportTicketsTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource:
+                - arn:aws:bedrock:*::foundation-model/amazon.nova-micro-v1:0
+                - arn:aws:bedrock:*::foundation-model/amazon.nova-pro-v1:0
+            - Effect: Allow
+              Action:
+                - bedrock-agent-runtime:Retrieve
+              Resource: !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/${BedrockKBIdCustomerSupport}'
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - sns:Publish
+              Resource: !Ref DevOpsEscalationTopic
+      Events:
+        SESEmail:
+          Type: CloudWatchEvent
+          Properties:
+            Pattern:
+              source:
+                - aws.ses
+              detail-type:
+                - SES Email Receipt
+      Tags:
+        Project: IELTS-AI-Prep
+        Component: Customer-Support-Agent
+  
+  DevOpsAgentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ielts-devops-agent
+      Handler: lambda_devops_agent.lambda_handler
+      Runtime: python3.11
+      CodeUri: .
+      MemorySize: 1024
+      Timeout: 300
+      Environment:
+        Variables:
+          KNOWLEDGE_BASE_ID_DEVOPS: !Ref BedrockKBIdDevOps
+          MODEL_ID: amazon.nova-pro-v1:0
+          DYNAMODB_ACTIONS_TABLE: !Ref DevOpsActionsTable
+          DYNAMODB_TICKETS_TABLE: !Ref SupportTicketsTable
+          CODECOMMIT_REPOS: ielts-ai-prep,ielts-deployment
+          ESCALATION_EMAIL: !Ref EscalationEmail
+          SUPPORT_EMAIL: !Ref SupportEmail
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DevOpsActionsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SupportTicketsTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource: arn:aws:bedrock:*::foundation-model/amazon.nova-pro-v1:0
+            - Effect: Allow
+              Action:
+                - bedrock-agent-runtime:Retrieve
+              Resource: !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/${BedrockKBIdDevOps}'
+            - Effect: Allow
+              Action:
+                - codecommit:GetFile
+                - codecommit:GetFolder
+                - codecommit:Get Branch
+                - codecommit:GetRepository
+                - codecommit:ListBranches
+                - codecommit:BatchGetRepositories
+              Resource:
+                - !Sub 'arn:aws:codecommit:${AWS::Region}:${AWS::AccountId}:ielts-*'
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: '*'
+      Events:
+        SNSTrigger:
+          Type: SNS
+          Properties:
+            Topic: !Ref DevOpsEscalationTopic
+      Tags:
+        Project: IELTS-AI-Prep
+        Component: DevOps-Agent
+
+  # Lambda Permissions
+  DevOpsLambdaSNSPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref DevOpsAgentFunction
+      Action: lambda:InvokeFunction
+      Principal: sns.amazonaws.com
+      SourceArn: !Ref DevOpsEscalationTopic
+
+  # ===== S3 Bucket for Knowledge Base =====
+  
+  KnowledgeBaseBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ielts-knowledge-base-${AWS::AccountId}'
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Project
+          Value: IELTS-AI-Prep
+        - Key: Component
+          Value: Knowledge-Base
+
+  # ===== SES Email Receiving =====
+  
+  SESReceiptRuleSet:
+    Type: AWS::SES::ReceiptRuleSet
+    Properties:
+      RuleSetName: ielts-support-email-rules
+  
+  SESReceiptRule:
+    Type: AWS::SES::ReceiptRule
+    Properties:
+      RuleSetName: !Ref SESReceiptRuleSet
+      Rule:
+        Name: forward-to-lambda
+        Enabled: true
+        Recipients:
+          - !Ref SupportEmail
+        Actions:
+          - LambdaAction:
+              FunctionArn: !GetAtt CustomerSupportFunction.Arn
+
+  SESLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref CustomerSupportFunction
+      Action: lambda:InvokeFunction
+      Principal: ses.amazonaws.com
+      SourceAccount: !Ref AWS::AccountId
+
+Outputs:
+  CustomerSupportFunctionArn:
+    Description: Customer Support Lambda ARN
+    Value: !GetAtt CustomerSupportFunction.Arn
+    Export:
+      Name: ielts-customer-support-function-arn
+  
+  DevOpsAgentFunctionArn:
+    Description: DevOps Agent Lambda ARN
+    Value: !GetAtt DevOpsAgentFunction.Arn
+    Export:
+      Name: ielts-devops-agent-function-arn
+  
+  DevOpsTopicArn:
+    Description: DevOps Escalation SNS Topic ARN
+    Value: !Ref DevOpsEscalationTopic
+    Export:
+      Name: ielts-devops-topic-arn
+  
+  SupportTicketsTableName:
+    Description: Support Tickets DynamoDB Table
+    Value: !Ref SupportTicketsTable
+    Export:
+      Name: ielts-support-tickets-table
+  
+  DevOpsActionsTableName:
+    Description: DevOps Actions DynamoDB Table
+    Value: !Ref DevOpsActionsTable
+    Export:
+      Name: ielts-devops-actions-table
+  
+  KnowledgeBaseBucketName:
+    Description: S3 Bucket for Knowledge Base files
+    Value: !Ref KnowledgeBaseBucket
+    Export:
+      Name: ielts-knowledge-base-bucket

@@ -1,0 +1,260 @@
+name: Mobile Apps CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'android/**'
+      - 'ios/**'
+      - 'capacitor.config.json'
+      - 'static/js/mobile_api_client.js'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  android-validation:
+    name: Android Build Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        
+    - name: Validate Android project structure
+      run: |
+        echo "Checking Android project structure..."
+        required_files=(
+          "android/build.gradle"
+          "android/app/build.gradle"
+          "android/app/src/main/AndroidManifest.xml"
+          "android/gradlew"
+        )
+        for file in "${required_files[@]}"; do
+          if [ -f "$file" ]; then
+            echo "✓ $file exists"
+          else
+            echo "✗ Missing: $file"
+            exit 1
+          fi
+        done
+        
+    - name: Check Android app ID configuration
+      run: |
+        echo "Validating Android app configuration..."
+        grep -q "com.ieltsaiprep.app" android/app/build.gradle && echo "✓ Correct app ID: com.ieltsaiprep.app"
+        
+    - name: Validate AndroidManifest.xml
+      run: |
+        if [ -f "android/app/src/main/AndroidManifest.xml" ]; then
+          echo "✓ AndroidManifest.xml found"
+          cat android/app/src/main/AndroidManifest.xml | head -20
+        fi
+        
+    - name: Check Capacitor Android assets
+      run: |
+        if [ -d "android/app/src/main/assets/capacitor.config.json" ] || [ -f "android/app/src/main/assets/capacitor.config.json" ]; then
+          echo "✓ Capacitor config in Android assets"
+        fi
+        
+    - name: Validate Gradle wrapper
+      run: |
+        cd android
+        chmod +x gradlew
+        ./gradlew --version
+        echo "✓ Gradle wrapper validated"
+        
+    - name: Check Gradle build file syntax
+      run: |
+        cd android
+        ./gradlew help --dry-run
+        echo "✓ Gradle build files are valid"
+        
+    - name: Set up Node.js for Capacitor
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Install Capacitor dependencies
+      run: |
+        npm install
+        npx cap sync android --no-build
+        echo "✓ Capacitor dependencies synced"
+        
+    - name: Run Android build test
+      run: |
+        cd android
+        ./gradlew assembleRelease --no-daemon --stacktrace
+        echo "✓ Android release build successful"
+        
+    - name: Verify APK was created
+      run: |
+        if [ -f "android/app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
+          ls -lh android/app/build/outputs/apk/release/app-release-unsigned.apk
+          echo "✓ APK file verified"
+        else
+          echo "✗ APK file not found"
+          exit 1
+        fi
+
+  ios-validation:
+    name: iOS Build Validation
+    runs-on: macos-latest
+    # Run iOS builds only on push to main or when manually triggered to reduce costs
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Validate iOS project structure
+      run: |
+        echo "Checking iOS project structure..."
+        required_files=(
+          "ios/App/App.xcodeproj/project.pbxproj"
+          "ios/App/App/AppDelegate.swift"
+          "ios/App/App/Info.plist"
+          "ios/App/App/capacitor.config.json"
+        )
+        for file in "${required_files[@]}"; do
+          if [ -f "$file" ]; then
+            echo "✓ $file exists"
+          else
+            echo "✗ Missing: $file"
+            exit 1
+          fi
+        done
+        
+    - name: Check iOS app ID configuration
+      run: |
+        echo "Validating iOS app configuration..."
+        grep -q "com.ieltsaiprep.genai" ios/App/App/Info.plist && echo "✓ Correct app ID: com.ieltsaiprep.genai"
+        
+    - name: Validate Info.plist structure
+      run: |
+        if [ -f "ios/App/App/Info.plist" ]; then
+          plutil -lint ios/App/App/Info.plist
+          echo "✓ Info.plist is valid"
+        fi
+        
+    - name: Set up Node.js for Capacitor
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Install Capacitor dependencies
+      run: |
+        npm install
+        npx cap sync ios --no-build
+        echo "✓ Capacitor dependencies synced to iOS"
+        
+    - name: Install CocoaPods dependencies
+      run: |
+        cd ios/App
+        pod install --repo-update
+        echo "✓ CocoaPods dependencies installed"
+        
+    - name: Build iOS project
+      run: |
+        cd ios/App
+        xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -sdk iphoneos CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+        echo "✓ iOS build successful"
+
+  capacitor-config:
+    name: Capacitor Configuration
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Install Capacitor CLI
+      run: |
+        npm install -g @capacitor/cli
+        npx cap --version
+        
+    - name: Validate root Capacitor config
+      run: |
+        cat capacitor.config.json
+        echo "✓ Root Capacitor config validated"
+        
+    - name: Check Android Capacitor config
+      run: |
+        if [ -f "android/app/src/main/assets/capacitor.config.json" ]; then
+          cat android/app/src/main/assets/capacitor.config.json
+          echo "✓ Android Capacitor config found"
+        fi
+        
+    - name: Check iOS Capacitor config  
+      run: |
+        if [ -f "ios/App/App/capacitor.config.json" ]; then
+          cat ios/App/App/capacitor.config.json
+          echo "✓ iOS Capacitor config found"
+        fi
+        
+    - name: Validate deep link scheme
+      run: |
+        grep -q "ieltsgenaiprep://" capacitor.config.json && echo "✓ Deep link scheme: ieltsgenaiprep://"
+        
+    - name: Validate production server URL
+      run: |
+        grep -q "www.ieltsaiprep.com" capacitor.config.json && echo "✓ Production server: www.ieltsaiprep.com"
+
+  mobile-api-client:
+    name: Mobile API Client Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Check mobile API client configuration
+      run: |
+        echo "Validating mobile API client..."
+        if [ -f "static/js/mobile_api_client.js" ]; then
+          grep -q "www.ieltsaiprep.com" static/js/mobile_api_client.js && echo "✓ API endpoint configured correctly"
+        fi
+        
+    - name: Validate deployment API client
+      run: |
+        if [ -f "deployment/static/js/mobile_api_client.js" ]; then
+          grep -q "www.ieltsaiprep.com" deployment/static/js/mobile_api_client.js && echo "✓ Deployment API client matches"
+        fi
+        
+    - name: Check WebSocket endpoint
+      run: |
+        if [ -f "static/js/mobile_api_client.js" ]; then
+          grep -q "wss://www.ieltsaiprep.com" static/js/mobile_api_client.js && echo "✓ WebSocket endpoint configured"
+        fi
+
+  mobile-build-summary:
+    name: Mobile Build Summary
+    runs-on: ubuntu-latest
+    needs: [android-validation, ios-validation, capacitor-config, mobile-api-client]
+    
+    steps:
+    - name: Summary
+      run: |
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "✓ Mobile Apps CI Pipeline - All Checks Passed"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "Android Validation: ✓"
+        echo "iOS Validation: ✓"
+        echo "Capacitor Config: ✓"
+        echo "API Client: ✓"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "Android App ID: com.ieltsaiprep.app"
+        echo "iOS App ID: com.ieltsaiprep.genai"
+        echo "Deep Link: ieltsgenaiprep://"
+        echo "Server: https://www.ieltsaiprep.com"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

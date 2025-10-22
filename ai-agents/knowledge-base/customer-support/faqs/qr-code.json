@@ -1,0 +1,53 @@
+{
+  "category": "qr_code",
+  "questions": [
+    {
+      "id": "qr-001",
+      "question": "What is the QR code and how do I use it?",
+      "answer": "The QR code is your bridge between mobile and web! Here's how it works:\n\n**Mobile to Web:**\n1. Open ieltsaiprep.com on your computer\n2. Click 'Sign in with QR Code'\n3. A QR code will appear on your computer screen\n4. Open the IELTS AI Prep app on your phone\n5. Tap 'Scan QR Code' and point your phone camera at the screen\n6. You're instantly logged in on the web!\n\n**Security:** QR codes expire after 5 minutes and can only be used once for security. You'll need to scan a new code each time you want to log in.",
+      "keywords": ["qr code", "qr", "how to use qr", "scan", "authenticate"],
+      "confidence": 0.95
+    },
+    {
+      "id": "qr-002",
+      "question": "My QR code expired. How do I get a new one?",
+      "answer": "QR codes expire after 5 minutes for security. To get a new one:\n\n1. Refresh the login page on your computer (or click 'Sign in with QR Code' again)\n2. A fresh QR code will appear on the screen\n3. Open the IELTS AI Prep app on your phone\n4. Tap 'Scan QR Code' and scan the new code within 5 minutes\n\nPro tip: Have your phone ready before generating the QR code to ensure you have enough time to scan it!",
+      "keywords": ["expired", "qr expired", "new qr code", "regenerate"],
+      "confidence": 0.95
+    },
+    {
+      "id": "qr-003",
+      "question": "QR code won't scan / scanning failed",
+      "answer": "If your QR code isn't scanning, try these solutions:\n\n**Camera Issues:**\n- Grant camera permission to the IELTS AI Prep app\n- Make sure your phone camera lens is clean\n- Ensure good lighting in the room\n\n**Display Issues:**\n- Increase your computer screen brightness\n- Make sure there's no glare on the screen\n- Hold your phone steady 6-12 inches from the screen\n- Try a different angle if needed\n\n**App Issues:**\n- Close and reopen the IELTS AI Prep app\n- Make sure you're using the latest version of the app\n- Try restarting your phone\n\n**Still not working?**\nRefresh the QR code on your computer and try again. If the issue persists, please reply with:\n- Your device type (iPhone/Android)\n- App version\n- Any error message you see\n\nI'll help troubleshoot further!",
+      "keywords": ["won't scan", "can't scan", "scanning failed", "not working", "camera"],
+      "confidence": 0.85
+    },
+    {
+      "id": "qr-004",
+      "question": "Can I use the web version without the mobile app?",
+      "answer": "Unfortunately, no. IELTS AI Prep requires the mobile app for two important reasons:\n\n1. **Purchase Verification:** All purchases are made through App Store/Play Store. The mobile app verifies your purchase entitlements.\n\n2. **QR Authentication:** The QR code login ensures secure access to the web platform while maintaining your purchase records.\n\nHowever, once you've purchased via mobile, you can use the web version as much as you like by scanning the QR code each session. The web version offers the full assessment experience with a larger screen and keyboard.",
+      "keywords": ["no app", "web only", "without mobile", "desktop only"],
+      "confidence": 0.95
+    },
+    {
+      "id": "qr-005",
+      "question": "QR code scanned but I'm not logged in",
+      "answer": "This can happen due to browser settings. Please try:\n\n1. **Enable cookies:** Our authentication requires browser cookies\n   - Chrome: Settings → Privacy → Cookies → Allow all cookies\n   - Safari: Preferences → Privacy → Uncheck 'Block all cookies'\n\n2. **Disable incognito/private mode:** Use a regular browser window\n\n3. **Clear cache and try again:**\n   - Close all browser tabs for ieltsaiprep.com\n   - Clear cache and cookies\n   - Go back to ieltsaiprep.com\n   - Click 'Sign in with QR Code'\n   - Scan the new QR code with your phone\n\n4. **Check session:** If you see 'Session Expired', generate a new QR code\n\nIf the issue persists after trying these steps, please reply with your browser name and version, and I'll escalate this to our technical team.",
+      "keywords": ["not logged in", "session", "authentication failed", "cookies"],
+      "confidence": 0.80,
+      "escalate_if_repeated": true
+    },
+    {
+      "id": "qr-006",
+      "question": "Where do I find the QR code scanner in the app?",
+      "answer": "To find the QR code scanner in the IELTS AI Prep mobile app:\n\n1. Open the IELTS AI Prep app on your phone\n2. Look for the 'Scan QR Code' button (usually on the main screen or menu)\n3. Tap it to open your phone's camera\n4. Point your camera at the QR code on your computer screen\n5. The app will automatically scan and log you in on the web\n\n**Note:** First, make sure you have a QR code displayed on your computer by going to ieltsaiprep.com and clicking 'Sign in with QR Code'.",
+      "keywords": ["find scanner", "where is scanner", "qr scanner", "scan button"],
+      "confidence": 0.90
+    }
+  ],
+  "template_responses": {
+    "qr_general_help": "The QR code is your secure bridge from mobile to web. Visit ieltsaiprep.com, click 'Sign in with QR Code', then scan the code with your phone's IELTS AI Prep app to instantly log in!",
+    "qr_security_info": "QR codes expire after 5 minutes and can only be used once. This ensures your account security.",
+    "escalation_message": "I've escalated your QR code issue to our technical team. They'll investigate and respond within 24 hours. Ticket ID: {ticket_id}"
+  }
+}

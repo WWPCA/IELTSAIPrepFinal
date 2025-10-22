@@ -1,0 +1,204 @@
+name: Android App Build & Distribution
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'android/**'
+      - 'deployment/**'
+      - 'capacitor.config.json'
+      - '.github/workflows/android-build.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build Type'
+        required: true
+        default: 'internal'
+        type: choice
+        options:
+          - internal
+          - production
+      increment_version:
+        description: 'Auto-increment version'
+        required: true
+        default: 'true'
+        type: boolean
+
+env:
+  JAVA_VERSION: '17'
+  NODE_VERSION: '20.x'
+
+jobs:
+  build:
+    name: Build Android App
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'gradle'
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        run: |
+          npm ci
+          npm install -g @capacitor/cli
+      
+      - name: Get Current Version
+        id: get_version
+        run: |
+          VERSION=$(grep -oP 'versionName\s+"\K[^"]+' android/app/build.gradle)
+          CODE=$(grep -oP 'versionCode\s+\K\d+' android/app/build.gradle)
+          echo "current_version=$VERSION" >> $GITHUB_OUTPUT
+          echo "current_code=$CODE" >> $GITHUB_OUTPUT
+          echo "Current version: $VERSION ($CODE)"
+      
+      - name: Auto-Increment Version
+        id: increment
+        if: github.event.inputs.increment_version == 'true' || github.event_name == 'push'
+        run: |
+          # Increment version code
+          CURRENT_CODE=${{ steps.get_version.outputs.current_code }}
+          NEW_CODE=$((CURRENT_CODE + 1))
+          
+          # Update version code in build.gradle
+          sed -i "s/versionCode $CURRENT_CODE/versionCode $NEW_CODE/" android/app/build.gradle
+          
+          echo "new_code=$NEW_CODE" >> $GITHUB_OUTPUT
+          echo "Incremented version code: $CURRENT_CODE → $NEW_CODE"
+      
+      - name: Sync Capacitor
+        run: |
+          npx cap sync android
+          echo "✅ Capacitor sync complete"
+      
+      - name: Setup Android Keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          # Decode and save keystore
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/release-keystore.jks
+          
+          # Create key.properties for signing
+          cat > android/key.properties <<EOF
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=release-keystore.jks
+          EOF
+          
+          echo "✅ Keystore configured"
+      
+      - name: Grant Execute Permission for Gradlew
+        run: chmod +x android/gradlew
+      
+      - name: Build Release APK
+        if: github.event.inputs.build_type == 'internal' || github.event_name != 'workflow_dispatch'
+        run: |
+          cd android
+          ./gradlew assembleRelease --stacktrace
+          echo "✅ APK built successfully"
+      
+      - name: Build Release AAB (App Bundle)
+        if: github.event.inputs.build_type == 'production'
+        run: |
+          cd android
+          ./gradlew bundleRelease --stacktrace
+          echo "✅ AAB built successfully"
+      
+      - name: Sign APK
+        if: github.event.inputs.build_type == 'internal' || github.event_name != 'workflow_dispatch'
+        run: |
+          APK_PATH=$(find android/app/build/outputs/apk/release -name "*.apk" -type f)
+          echo "Found APK: $APK_PATH"
+          echo "apk_path=$APK_PATH" >> $GITHUB_ENV
+      
+      - name: Sign AAB
+        if: github.event.inputs.build_type == 'production'
+        run: |
+          AAB_PATH=$(find android/app/build/outputs/bundle/release -name "*.aab" -type f)
+          echo "Found AAB: $AAB_PATH"
+          echo "aab_path=$AAB_PATH" >> $GITHUB_ENV
+      
+      - name: Upload APK Artifact
+        if: env.apk_path
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-app-${{ steps.get_version.outputs.current_version }}-${{ steps.increment.outputs.new_code || steps.get_version.outputs.current_code }}-apk
+          path: ${{ env.apk_path }}
+          retention-days: 30
+      
+      - name: Upload AAB Artifact
+        if: env.aab_path
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-app-${{ steps.get_version.outputs.current_version }}-${{ steps.increment.outputs.new_code || steps.get_version.outputs.current_code }}-aab
+          path: ${{ env.aab_path }}
+          retention-days: 30
+      
+      - name: Upload to Google Play Internal Testing
+        if: github.event.inputs.build_type == 'internal' && github.event_name == 'workflow_dispatch'
+        uses: r0adkll/upload-google-play@v1.1.3
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.ieltsaiprep.app
+          releaseFiles: ${{ env.aab_path }}
+          track: internal
+          status: completed
+      
+      - name: Upload to Google Play Production
+        if: github.event.inputs.build_type == 'production' && github.event_name == 'workflow_dispatch'
+        uses: r0adkll/upload-google-play@v1.1.3
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.ieltsaiprep.app
+          releaseFiles: ${{ env.aab_path }}
+          track: production
+          status: draft
+      
+      - name: Commit Version Increment
+        if: steps.increment.outputs.new_code && github.event_name == 'push'
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add android/app/build.gradle
+          git commit -m "chore(android): bump version code to ${{ steps.increment.outputs.new_code }}"
+          git push
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f android/app/release-keystore.jks
+          rm -f android/key.properties
+      
+      - name: Build Summary
+        run: |
+          echo "## Android Build Complete ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: ${{ steps.get_version.outputs.current_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version Code**: ${{ steps.increment.outputs.new_code || steps.get_version.outputs.current_code }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Type**: ${{ github.event.inputs.build_type || 'internal' }}" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ env.apk_path }}" ]; then
+            echo "- **APK**: Generated" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -n "${{ env.aab_path }}" ]; then
+            echo "- **AAB**: Generated" >> $GITHUB_STEP_SUMMARY
+          fi

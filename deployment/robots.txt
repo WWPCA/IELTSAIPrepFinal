@@ -1,0 +1,125 @@
+# IELTS AI Prep - Robots.txt Configuration
+# Last Updated: October 5, 2025
+# Optimized for AI SEO and maximum AI search visibility
+
+# ==================================================
+# AI ASSISTANT BOTS - Allow (Drive Referral Traffic)
+# ==================================================
+# These bots fetch content in real-time for AI search results and citations
+
+# OpenAI - ChatGPT Search & Real-time Browsing
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+# Anthropic - Claude Real-time Web Access
+User-agent: Claude-Web
+Allow: /
+
+# Perplexity AI - Citation & Search (High Referral Traffic)
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-PageFetcher
+Allow: /
+
+# Google Search & Assistant
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bard
+Allow: /
+
+User-agent: Gemini
+Allow: /
+
+# Microsoft Bing & Copilot
+User-agent: Bingbot
+Allow: /
+
+# Apple - Siri & Spotlight Search
+User-agent: Applebot
+Allow: /
+
+# DuckDuckGo
+User-agent: DuckDuckBot
+Allow: /
+
+# Baidu (China)
+User-agent: Baiduspider
+Allow: /
+
+# Yandex (Russia)
+User-agent: YandexBot
+Allow: /
+
+# Social Media Link Previews
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+# ==================================================
+# AI TRAINING BOTS - Allow (For Model Training)
+# ==================================================
+# These bots crawl to train AI models - allowing them helps AI assistants
+# understand IELTS prep better and recommend your service
+
+# OpenAI - GPT Model Training
+User-agent: GPTBot
+Allow: /
+
+# Anthropic - Claude Model Training
+User-agent: ClaudeBot
+Allow: /
+
+# Google - Gemini & Vertex AI Training
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PaLM
+Allow: /
+
+# Common Crawl - Public Dataset (Used by Many AI Models)
+User-agent: CCBot
+Allow: /
+
+# Meta/Facebook - Llama AI Training
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Amazon - Alexa & AWS AI
+User-agent: Amazonbot
+Allow: /
+
+# ByteDance - TikTok/Doubao AI
+User-agent: Bytespider
+Allow: /
+
+# Cohere - Enterprise AI
+User-agent: cohere-ai
+Allow: /
+
+# ==================================================
+# DEFAULT RULE - Allow All Other Crawlers
+# ==================================================
+User-agent: *
+Allow: /
+
+# ==================================================
+# SITEMAP LOCATION
+# ==================================================
+Sitemap: https://www.ieltsaiprep.com/sitemap.xml
+Sitemap: https://ieltsaiprep.com/sitemap.xml

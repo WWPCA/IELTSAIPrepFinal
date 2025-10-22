@@ -1,0 +1,213 @@
+name: iOS App Build & Distribution
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'ios/**'
+      - 'deployment/**'
+      - 'capacitor.config.json'
+      - '.github/workflows/ios-build.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build Type'
+        required: true
+        default: 'testflight'
+        type: choice
+        options:
+          - testflight
+          - appstore
+      increment_version:
+        description: 'Auto-increment version'
+        required: true
+        default: 'true'
+        type: boolean
+
+env:
+  XCODE_VERSION: '15.2'
+  IOS_SCHEME: 'App'
+  IOS_WORKSPACE: 'ios/App/App.xcworkspace'
+  IOS_PROJECT: 'ios/App/App.xcodeproj'
+
+jobs:
+  build:
+    name: Build iOS App
+    runs-on: macos-14
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        run: |
+          npm ci
+          npm install -g @capacitor/cli
+      
+      - name: Select Xcode Version
+        run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app/Contents/Developer
+      
+      - name: Get Current Version
+        id: get_version
+        run: |
+          VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" ios/App/App/Info.plist)
+          BUILD=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" ios/App/App/Info.plist)
+          echo "current_version=$VERSION" >> $GITHUB_OUTPUT
+          echo "current_build=$BUILD" >> $GITHUB_OUTPUT
+          echo "Current version: $VERSION ($BUILD)"
+      
+      - name: Auto-Increment Version
+        id: increment
+        if: github.event.inputs.increment_version == 'true' || github.event_name == 'push'
+        run: |
+          # Increment build number
+          CURRENT_BUILD=${{ steps.get_version.outputs.current_build }}
+          NEW_BUILD=$((CURRENT_BUILD + 1))
+          
+          # Update build number
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NEW_BUILD" ios/App/App/Info.plist
+          
+          echo "new_build=$NEW_BUILD" >> $GITHUB_OUTPUT
+          echo "Incremented build number: $CURRENT_BUILD → $NEW_BUILD"
+      
+      - name: Sync Capacitor
+        run: |
+          npx cap sync ios
+          echo "✅ Capacitor sync complete"
+      
+      - name: Install CocoaPods
+        run: |
+          cd ios/App
+          pod install --repo-update
+      
+      - name: Import Code Signing Certificates
+        env:
+          CERTIFICATES_P12: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          PROVISIONING_PROFILE: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          # Create temporary keychain
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+          
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          
+          # Import certificate
+          echo "$CERTIFICATES_P12" | base64 --decode > certificate.p12
+          security import certificate.p12 -k $KEYCHAIN_PATH -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          
+          # Import provisioning profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROVISIONING_PROFILE" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+          
+          # List keychains
+          security list-keychains -d user -s $KEYCHAIN_PATH
+          security default-keychain -s $KEYCHAIN_PATH
+          
+          echo "✅ Certificates and provisioning profile imported"
+      
+      - name: Build iOS App
+        run: |
+          xcodebuild \
+            -workspace "${{ env.IOS_WORKSPACE }}" \
+            -scheme "${{ env.IOS_SCHEME }}" \
+            -configuration Release \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -destination 'generic/platform=iOS' \
+            clean archive \
+            CODE_SIGN_STYLE=Manual \
+            | xcpretty
+          
+          echo "✅ Archive created successfully"
+      
+      - name: Export IPA
+        run: |
+          # Create export options plist
+          cat > export-options.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>teamID</key>
+            <string>${{ secrets.APPLE_TEAM_ID }}</string>
+            <key>uploadSymbols</key>
+            <true/>
+            <key>compileBitcode</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
+          
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportPath "$RUNNER_TEMP/IPA" \
+            -exportOptionsPlist export-options.plist \
+            | xcpretty
+          
+          echo "✅ IPA exported successfully"
+      
+      - name: Upload to TestFlight
+        if: github.event.inputs.build_type == 'testflight' || github.event_name == 'push'
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+        run: |
+          xcrun altool \
+            --upload-app \
+            --type ios \
+            --file "$RUNNER_TEMP/IPA/App.ipa" \
+            --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+          
+          echo "✅ IPA uploaded to TestFlight"
+      
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-app-${{ steps.get_version.outputs.current_version }}-${{ steps.increment.outputs.new_build || steps.get_version.outputs.current_build }}
+          path: ${{ runner.temp }}/IPA/App.ipa
+          retention-days: 30
+      
+      - name: Commit Version Increment
+        if: steps.increment.outputs.new_build && github.event_name == 'push'
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add ios/App/App/Info.plist
+          git commit -m "chore(ios): bump build number to ${{ steps.increment.outputs.new_build }}"
+          git push
+      
+      - name: Cleanup Keychain
+        if: always()
+        run: |
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          if [ -f "$KEYCHAIN_PATH" ]; then
+            security delete-keychain $KEYCHAIN_PATH || true
+          fi
+          rm -f certificate.p12 export-options.plist
+      
+      - name: Build Summary
+        run: |
+          echo "## iOS Build Complete ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: ${{ steps.get_version.outputs.current_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build**: ${{ steps.increment.outputs.new_build || steps.get_version.outputs.current_build }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Scheme**: ${{ env.IOS_SCHEME }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Xcode**: ${{ env.XCODE_VERSION }}" >> $GITHUB_STEP_SUMMARY

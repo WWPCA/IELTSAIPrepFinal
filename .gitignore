@@ -1,0 +1,99 @@
+# Build outputs
+.aws-sam/
+android/build/
+android/app/build/
+android/.gradle/
+ios/build/
+ios/Pods/
+ios/App/Pods/
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg-info/
+dist/
+build/
+
+# Archives and build artifacts (CRITICAL - prevents large file errors)
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.pkg
+*.dmg
+*lambda-with-deps*
+*awscliv2*
+deployment-package/
+lambda-package/
+
+# Environment files
+.env
+.env.local
+.env.production
+*.key
+*.pem
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+access_logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+attached_assets/
+github_backup/
+archive/
+.replit
+.config/
+.upm/
+
+# Git backups (contains old large files!)
+.git.backup.*
+
+# Replit dependency caches (CRITICAL - these are huge!)
+.cache/
+.pythonlibs/
+.local/
+.nix-defexpr/
+.nix-profile/
+
+# Duplicates and status docs
+*COMPLETE.md
+*SUMMARY.md
+*FIXES*.md
+*FIX-*.md
+LOGIN-FIX*.md
+RECAPTCHA-*.md
+TABLE_MAPPING_*.md
+TEST-CREDENTIALS-*.md
+ULTIMATE-*.md
+URGENT-*.md
+VERIFICATION*.md
+COMPREHENSIVE-*.md
+MOBILE_INTEGRATION_COMPLETE.md
+MOBILE_APP_STATUS_AND_PLAN.md
+FINAL_STATUS_REPORT.md
+EMAIL_TEMPLATES_COMPLETE.md
+EMAIL_TEMPLATE_AUDIT.md
+EMAIL_AND_AI_UPDATES_SUMMARY.md
+
+# Keep important docs
+!README.md
+!replit.md
+!GITHUB_EXPORT_READY.md
+!API_ENDPOINT_AUDIT.md
+!DYNAMODB_TABLE_AUDIT.md
+!LAMBDA_ARCHITECTURE_EXPLAINED.md
+!app-store-setup-steps.md
+!NOVA_PRO_ESCALATION_DESIGN.md

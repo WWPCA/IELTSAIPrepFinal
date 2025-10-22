@@ -1,0 +1,209 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: IELTS AI Prep - Speaking Assessment with Gemini Live API via WebSocket
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - development
+      - staging
+      - production
+    Description: Deployment environment
+  
+  GCPCredentialsSecretName:
+    Type: String
+    Default: gemini-vertex-ai-credentials
+    Description: AWS Secrets Manager secret name for GCP service account credentials
+  
+  SessionsTableName:
+    Type: String
+    Default: ielts-genai-prep-sessions
+    Description: DynamoDB table for session management
+
+Globals:
+  Function:
+    Timeout: 900  # 15 minutes (maximum for Lambda)
+    MemorySize: 2048
+    Runtime: python3.11
+    Environment:
+      Variables:
+        ENVIRONMENT: !Ref Environment
+        GCP_CREDENTIALS_SECRET: !Ref GCPCredentialsSecretName
+        SESSIONS_TABLE: !Ref SessionsTableName
+        LOG_LEVEL: INFO
+
+Resources:
+  # WebSocket API
+  SpeakingWebSocketAPI:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub ${Environment}-ielts-speaking-websocket
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: $request.body.action
+      Description: WebSocket API for real-time IELTS speaking assessments
+
+  # Lambda Function for WebSocket handling
+  SpeakingWebSocketFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-ielts-speaking-websocket
+      CodeUri: .
+      Handler: lambda_speaking_handler.lambda_handler
+      Description: Handles WebSocket connections for Gemini Live API streaming
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SessionsTableName
+        - Statement:
+          - Effect: Allow
+            Action:
+              - secretsmanager:GetSecretValue
+            Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${GCPCredentialsSecretName}*
+        - Statement:
+          - Effect: Allow
+            Action:
+              - execute-api:ManageConnections
+            Resource: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SpeakingWebSocketAPI}/*
+      Environment:
+        Variables:
+          APIGW_ENDPOINT: !Sub https://${SpeakingWebSocketAPI}.execute-api.${AWS::Region}.amazonaws.com/${Environment}
+
+  # Lambda Permission for API Gateway
+  SpeakingWebSocketInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SpeakingWebSocketFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SpeakingWebSocketAPI}/*
+
+  # WebSocket Routes
+  ConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SpeakingWebSocketAPI
+      RouteKey: $connect
+      Target: !Sub integrations/${ConnectIntegration}
+  
+  ConnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SpeakingWebSocketAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SpeakingWebSocketFunction.Arn}/invocations
+  
+  DisconnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SpeakingWebSocketAPI
+      RouteKey: $disconnect
+      Target: !Sub integrations/${DisconnectIntegration}
+  
+  DisconnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SpeakingWebSocketAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SpeakingWebSocketFunction.Arn}/invocations
+  
+  StartSpeakingRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SpeakingWebSocketAPI
+      RouteKey: start_speaking
+      Target: !Sub integrations/${StartSpeakingIntegration}
+  
+  StartSpeakingIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SpeakingWebSocketAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SpeakingWebSocketFunction.Arn}/invocations
+  
+  AudioChunkRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SpeakingWebSocketAPI
+      RouteKey: audio_chunk
+      Target: !Sub integrations/${AudioChunkIntegration}
+  
+  AudioChunkIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SpeakingWebSocketAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SpeakingWebSocketFunction.Arn}/invocations
+  
+  EndSpeakingRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SpeakingWebSocketAPI
+      RouteKey: end_speaking
+      Target: !Sub integrations/${EndSpeakingIntegration}
+  
+  EndSpeakingIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SpeakingWebSocketAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SpeakingWebSocketFunction.Arn}/invocations
+  
+  DefaultRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SpeakingWebSocketAPI
+      RouteKey: $default
+      Target: !Sub integrations/${DefaultIntegration}
+  
+  DefaultIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SpeakingWebSocketAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SpeakingWebSocketFunction.Arn}/invocations
+
+  # WebSocket Deployment
+  SpeakingWebSocketDeployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+      - ConnectRoute
+      - DisconnectRoute
+      - StartSpeakingRoute
+      - AudioChunkRoute
+      - EndSpeakingRoute
+      - DefaultRoute
+    Properties:
+      ApiId: !Ref SpeakingWebSocketAPI
+  
+  SpeakingWebSocketStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref SpeakingWebSocketAPI
+      DeploymentId: !Ref SpeakingWebSocketDeployment
+      StageName: !Ref Environment
+      Description: !Sub ${Environment} stage for speaking assessments
+      DefaultRouteSettings:
+        DataTraceEnabled: true
+        LoggingLevel: INFO
+        ThrottlingBurstLimit: 500
+        ThrottlingRateLimit: 1000
+
+Outputs:
+  WebSocketURL:
+    Description: WebSocket URL for speaking assessments
+    Value: !Sub wss://${SpeakingWebSocketAPI}.execute-api.${AWS::Region}.amazonaws.com/${Environment}
+    Export:
+      Name: !Sub ${Environment}-speaking-websocket-url
+  
+  WebSocketAPIId:
+    Description: API Gateway WebSocket API ID
+    Value: !Ref SpeakingWebSocketAPI
+    Export:
+      Name: !Sub ${Environment}-speaking-api-id
+  
+  LambdaFunctionArn:
+    Description: Speaking WebSocket Lambda Function ARN
+    Value: !GetAtt SpeakingWebSocketFunction.Arn
+    Export:
+      Name: !Sub ${Environment}-speaking-lambda-arn

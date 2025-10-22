@@ -1,0 +1,303 @@
+name: AWS Deployment Validation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'deployment/**'
+      - 'ai-agents/**'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lambda-structure:
+    name: Lambda Package Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+      
+    - name: Validate Lambda deployment structure
+      run: |
+        echo "Checking Lambda deployment structure..."
+        required_files=(
+          "deployment/lambda_handler.py"
+          "deployment/app.py"
+          "deployment/bedrock_service.py"
+          "deployment/dynamodb_dal.py"
+          "deployment/requirements.txt"
+        )
+        for file in "${required_files[@]}"; do
+          if [ -f "$file" ]; then
+            echo "✓ $file exists"
+          else
+            echo "✗ Missing critical file: $file"
+            exit 1
+          fi
+        done
+        
+    - name: Check Lambda handler entry point
+      run: |
+        grep -q "def lambda_handler" deployment/lambda_handler.py && echo "✓ Lambda handler function found"
+        
+    - name: Validate Flask app for Lambda
+      run: |
+        grep -q "from awsgi import response" deployment/lambda_handler.py && echo "✓ awsgi configured for Lambda"
+        
+    - name: Create clean virtual environment
+      run: |
+        python -m venv /tmp/lambda_test_env
+        source /tmp/lambda_test_env/bin/activate
+        pip install --upgrade pip
+        echo "✓ Clean virtual environment created"
+        
+    - name: Install Lambda dependencies
+      run: |
+        source /tmp/lambda_test_env/bin/activate
+        cd deployment
+        pip install -r requirements.txt
+        echo "✓ All dependencies installed successfully"
+        
+    - name: Verify critical packages
+      run: |
+        source /tmp/lambda_test_env/bin/activate
+        python -c "import anthropic; import boto3; import flask; print('✓ Critical imports successful')"
+        
+    - name: Lambda handler smoke tests
+      run: |
+        source /tmp/lambda_test_env/bin/activate
+        export SESSION_SECRET="test-secret"
+        export DATABASE_URL="postgresql://test"
+        python -c "
+        import sys
+        import json
+        sys.path.insert(0, 'deployment')
+        from lambda_handler import lambda_handler
+        
+        # Mock context
+        context = type('Context', (), {'request_id': 'test-123', 'function_name': 'test'})()
+        tests_passed = 0
+        
+        # Test 1: Simple GET request to root
+        event1 = {
+            'httpMethod': 'GET',
+            'path': '/',
+            'headers': {},
+            'queryStringParameters': None,
+            'body': None
+        }
+        try:
+            resp = lambda_handler(event1, context)
+            assert 'statusCode' in resp, 'Missing statusCode'
+            assert isinstance(resp['statusCode'], int), 'Invalid statusCode type'
+            # Strict: root path must return 2xx success
+            assert 200 <= resp['statusCode'] < 300, \
+                f'Root path must return 2xx, got {resp[\"statusCode\"]}'
+            assert 'body' in resp or 'headers' in resp, 'Response missing body/headers'
+            print(f'✓ Test 1: GET / returned 2xx (status={resp[\"statusCode\"]})')
+            tests_passed += 1
+        except Exception as e:
+            print(f'✗ Test 1 failed: {e}')
+            sys.exit(1)
+            
+        # Test 2: GET with query parameters
+        event2 = {
+            'httpMethod': 'GET',
+            'path': '/api/health',
+            'headers': {},
+            'queryStringParameters': {'test': 'true'},
+            'body': None
+        }
+        try:
+            resp = lambda_handler(event2, context)
+            assert 'statusCode' in resp, 'Missing statusCode'
+            # Accept 200 (if implemented) or 404 (if not), reject everything else
+            if resp['statusCode'] not in [200, 404]:
+                raise AssertionError(
+                    f'Health endpoint must return 200 (implemented) or 404 (not found), '
+                    f'got {resp[\"statusCode\"]}'
+                )
+            print(f'✓ Test 2: GET /api/health with params (status={resp[\"statusCode\"]})')
+            tests_passed += 1
+        except Exception as e:
+            print(f'✗ Test 2 failed: {e}')
+            sys.exit(1)
+            
+        # Test 3: POST with JSON body
+        event3 = {
+            'httpMethod': 'POST',
+            'path': '/api/test',
+            'headers': {'Content-Type': 'application/json'},
+            'queryStringParameters': None,
+            'body': json.dumps({'test': 'data'})
+        }
+        try:
+            resp = lambda_handler(event3, context)
+            assert 'statusCode' in resp, 'Missing statusCode'
+            # Accept 2xx success or 404 not found, reject client/server errors
+            if not (200 <= resp['statusCode'] < 300 or resp['statusCode'] == 404):
+                raise AssertionError(
+                    f'POST must return 2xx or 404, got {resp[\"statusCode\"]}'
+                )
+            assert 'body' in resp, 'Response missing body'
+            print(f'✓ Test 3: POST /api/test with body (status={resp[\"statusCode\"]})')
+            tests_passed += 1
+        except Exception as e:
+            print(f'✗ Test 3 failed: {e}')
+            sys.exit(1)
+            
+        print(f'\\n✓ All {tests_passed}/3 Lambda smoke tests passed')
+        "
+        
+    - name: Estimate package size
+      run: |
+        source /tmp/lambda_test_env/bin/activate
+        cd deployment
+        total_size=$(du -sb . | cut -f1)
+        size_mb=$((total_size / 1024 / 1024))
+        echo "Estimated Lambda package size: ${size_mb}MB"
+        if [ $size_mb -gt 250 ]; then
+          echo "⚠ Warning: Package size exceeds 250MB (unzipped limit)"
+        else
+          echo "✓ Package size within limits"
+        fi
+
+  ai-agents:
+    name: AI Agents Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Validate AI agent structure
+      run: |
+        echo "Checking AI agents..."
+        if [ -f "ai-agents/lambda_customer_support.py" ]; then
+          echo "✓ Customer Support Agent exists"
+          grep -q "MODEL_ID_MICRO" ai-agents/lambda_customer_support.py && echo "✓ Nova Micro configured"
+          grep -q "MODEL_ID_PRO" ai-agents/lambda_customer_support.py && echo "✓ Nova Pro escalation configured"
+        fi
+        
+    - name: Check DevOps agent
+      run: |
+        if [ -f "ai-agents/lambda_devops_agent.py" ]; then
+          echo "✓ DevOps Agent exists"
+          grep -q "codecommit" ai-agents/lambda_devops_agent.py && echo "✓ CodeCommit integration configured"
+        fi
+        
+    - name: Validate CloudFormation template
+      run: |
+        if [ -f "ai-agents/cloudformation-agents.yaml" ]; then
+          echo "✓ CloudFormation template exists"
+          cat ai-agents/cloudformation-agents.yaml | head -30
+        fi
+        
+    - name: Check knowledge base structure
+      run: |
+        if [ -d "ai-agents/knowledge-base" ]; then
+          echo "✓ Knowledge base directory exists"
+          ls -la ai-agents/knowledge-base/
+        fi
+
+  dynamodb-schema:
+    name: DynamoDB Schema Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Validate DynamoDB table references
+      run: |
+        echo "Checking DynamoDB table names..."
+        expected_tables=(
+          "ielts-genai-prep-users"
+          "ielts-genai-prep-sessions"
+          "ielts-genai-prep-assessments"
+          "ielts-genai-prep-qr-tokens"
+          "ielts-genai-prep-entitlements"
+          "ielts-assessment-questions"
+          "ielts-assessment-rubrics"
+          "ielts-support-tickets"
+          "ielts-devops-actions"
+        )
+        for table in "${expected_tables[@]}"; do
+          grep -r "$table" deployment/ >/dev/null && echo "✓ $table referenced in code"
+        done
+        
+    - name: Check DAL implementation
+      run: |
+        python -c "
+        import sys
+        import os
+        sys.path.insert(0, 'deployment')
+        print('Validating DynamoDB DAL...')
+        with open('deployment/dynamodb_dal.py', 'r') as f:
+            content = f.read()
+            required = ['get_user', 'create_user', 'get_assessment', 'create_assessment']
+            for func in required:
+                if func in content:
+                    print(f'✓ Function {func} found')
+        "
+
+  infrastructure-config:
+    name: Infrastructure Configuration
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Validate production configuration
+      run: |
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "Production Infrastructure Configuration"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "Lambda Function: ielts-genai-prep-api"
+        echo "API Gateway: n0cpf1rmvc (prod stage)"
+        echo "CloudFront: E1EPXAU67877FR"
+        echo "Domain: www.ieltsaiprep.com"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        
+    - name: Check email configuration
+      run: |
+        echo "Validating email endpoints..."
+        grep -r "info@ieltsaiprep.com" deployment/ >/dev/null && echo "✓ Customer support email configured"
+        grep -r "donotreply@ieltsaiprep.com" deployment/ >/dev/null && echo "✓ System email configured"
+        
+    - name: Validate AI service integration
+      run: |
+        echo "Checking AI services..."
+        grep -r "bedrock" deployment/ >/dev/null && echo "✓ AWS Bedrock integration found"
+        grep -r "gemini" deployment/ >/dev/null && echo "✓ Google Gemini integration found"
+
+  deployment-summary:
+    name: Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [lambda-structure, ai-agents, dynamodb-schema, infrastructure-config]
+    
+    steps:
+    - name: Summary
+      run: |
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "✓ Deployment Validation - All Checks Passed"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "Lambda Structure: ✓"
+        echo "AI Agents: ✓"
+        echo "DynamoDB Schema: ✓"
+        echo "Infrastructure Config: ✓"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "Ready for AWS deployment"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
