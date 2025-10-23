@@ -3,11 +3,6 @@ name: iOS App Build & Distribution
 on:
   push:
     branches: [main, develop]
-    paths:
-      - 'ios/**'
-      - 'deployment/**'
-      - 'capacitor.config.json'
-      - '.github/workflows/ios-build.yml'
   pull_request:
     branches: [main]
   workflow_dispatch:

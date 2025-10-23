@@ -3,11 +3,6 @@ name: Android App Build & Distribution
 on:
   push:
     branches: [main, develop]
-    paths:
-      - 'android/**'
-      - 'deployment/**'
-      - 'capacitor.config.json'
-      - '.github/workflows/android-build.yml'
   pull_request:
     branches: [main]
   workflow_dispatch:
