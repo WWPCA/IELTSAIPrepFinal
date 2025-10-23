@@ -379,6 +379,60 @@ jobs:
           pytest tests/test_all_products_e2e.py::TestBandScoreCalculation -v
           echo "✅ Overall band score calculation validated"
 
+  score-report-feedback-tests:
+    name: Score Report & Feedback Display Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+      
+      - name: Test Writing Score Report Display
+        run: |
+          pytest tests/test_score_report_feedback.py::TestWritingScoreReportDisplay -v
+          echo "✅ Writing score report display validated"
+      
+      - name: Test Speaking Score Report Display
+        run: |
+          pytest tests/test_score_report_feedback.py::TestSpeakingScoreReportDisplay -v
+          echo "✅ Speaking score report display validated"
+      
+      - name: Test Reading Score Report Display
+        run: |
+          pytest tests/test_score_report_feedback.py::TestReadingScoreReportDisplay -v
+          echo "✅ Reading score report display validated"
+      
+      - name: Test Listening Score Report Display
+        run: |
+          pytest tests/test_score_report_feedback.py::TestListeningScoreReportDisplay -v
+          echo "✅ Listening score report display validated"
+      
+      - name: Test Full Mock Test Score Report
+        run: |
+          pytest tests/test_score_report_feedback.py::TestFullMockTestScoreReportDisplay -v
+          echo "✅ Full mock test comprehensive report validated"
+      
+      - name: Test Feedback Completeness
+        run: |
+          pytest tests/test_score_report_feedback.py::TestFeedbackGenerationCompleteness -v
+          echo "✅ Feedback generation completeness validated"
+      
+      - name: Test Score Report Accessibility
+        run: |
+          pytest tests/test_score_report_feedback.py::TestScoreReportAccessibility -v
+          echo "✅ Past assessment access validated"
+
   end-to-end-tests:
     name: End-to-End Assessment Flow Tests
     runs-on: ubuntu-latest
@@ -545,7 +599,7 @@ jobs:
   test-summary:
     name: Comprehensive Test Summary
     runs-on: ubuntu-latest
-    needs: [unit-and-integration-tests, security-and-compliance, lambda-handler-validation, bedrock-nova-micro-tests, gemini-flash-tests, user-journey-e2e-tests, all-products-e2e-tests, end-to-end-tests, api-validation, mobile-build-validation, code-quality]
+    needs: [unit-and-integration-tests, security-and-compliance, lambda-handler-validation, bedrock-nova-micro-tests, gemini-flash-tests, user-journey-e2e-tests, all-products-e2e-tests, score-report-feedback-tests, end-to-end-tests, api-validation, mobile-build-validation, code-quality]
     if: always()
     
     steps:
@@ -564,6 +618,7 @@ jobs:
           echo "| Gemini Flash & Flash Lite | ${{ needs.gemini-flash-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| User Journey E2E Tests | ${{ needs.user-journey-e2e-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| All Products E2E Tests | ${{ needs.all-products-e2e-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Score Report & Feedback | ${{ needs.score-report-feedback-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Assessment Flow Tests | ${{ needs.end-to-end-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| API Validation | ${{ needs.api-validation.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Mobile Build Validation | ${{ needs.mobile-build-validation.result }} |" >> $GITHUB_STEP_SUMMARY
