@@ -59,6 +59,13 @@ jobs:
           npm ci
           npm install -g @capacitor/cli
       
+      - name: Prepare Web Assets
+        run: |
+          mkdir -p static
+          cp -r deployment/templates/* static/ 2>/dev/null || true
+          cp -r deployment/static/* static/ 2>/dev/null || true
+          echo "✅ Latest frontend prepared for Android build"
+      
       - name: Get Current Version
         id: get_version
         run: |

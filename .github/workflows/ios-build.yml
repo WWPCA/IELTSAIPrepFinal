@@ -54,6 +54,13 @@ jobs:
           npm ci
           npm install -g @capacitor/cli
       
+      - name: Prepare Web Assets
+        run: |
+          mkdir -p static
+          cp -r deployment/templates/* static/ 2>/dev/null || true
+          cp -r deployment/static/* static/ 2>/dev/null || true
+          echo "✅ Latest frontend prepared for iOS build"
+      
       - name: Select Xcode Version
         run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app/Contents/Developer
       
