@@ -38,10 +38,10 @@ jobs:
       
     - name: Build web assets
       run: |
-        # Copy static files to ensure web assets are ready
+        # Copy latest frontend from deployment folder to Capacitor webDir
         mkdir -p static
-        cp -r templates/* static/ 2>/dev/null || true
-        cp -r static/* static/ 2>/dev/null || true
+        cp -r deployment/templates/* static/ 2>/dev/null || true
+        cp -r deployment/static/* static/ 2>/dev/null || true
         
     - name: Sync Capacitor
       run: |

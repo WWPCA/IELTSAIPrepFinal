@@ -236,9 +236,8 @@ jobs:
     - name: Build web assets
       run: |
         mkdir -p static
-        if [ -d "templates" ]; then
-          cp -r templates/* static/ 2>/dev/null || true
-        fi
+        cp -r deployment/templates/* static/ 2>/dev/null || true
+        cp -r deployment/static/* static/ 2>/dev/null || true
         
     - name: Sync Capacitor
       if: hashFiles('package.json') != ''
@@ -284,9 +283,8 @@ jobs:
     - name: Build web assets
       run: |
         mkdir -p static
-        if [ -d "templates" ]; then
-          cp -r templates/* static/ 2>/dev/null || true
-        fi
+        cp -r deployment/templates/* static/ 2>/dev/null || true
+        cp -r deployment/static/* static/ 2>/dev/null || true
         
     - name: Sync Capacitor
       if: hashFiles('package.json') != ''

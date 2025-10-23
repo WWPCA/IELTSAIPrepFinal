@@ -46,10 +46,11 @@ jobs:
       
     - name: Build web assets
       run: |
-        # Ensure web assets directory exists and copy templates (Flask app to Capacitor web)
+        # Copy latest frontend from deployment folder to Capacitor webDir
         mkdir -p static
-        cp -r templates/* static/ 2>/dev/null || true
-        echo "Web assets prepared for Android:"
+        cp -r deployment/templates/* static/ 2>/dev/null || true
+        cp -r deployment/static/* static/ 2>/dev/null || true
+        echo "Latest web assets prepared for Android:"
         ls -la static/
         
     - name: Sync Capacitor
