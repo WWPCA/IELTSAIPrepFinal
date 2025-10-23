@@ -128,6 +128,70 @@ jobs:
           print('✅ Lambda handler structure validated')
           "
 
+  bedrock-nova-micro-tests:
+    name: AWS Bedrock Nova Micro Model Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+      
+      - name: Test Nova Micro Model Configuration
+        run: |
+          pytest tests/test_bedrock_nova_micro.py::TestNovaMicroConfiguration -v
+          echo "✅ Nova Micro model configured"
+      
+      - name: Test Writing Assessment Evaluation (Academic Task 1)
+        run: |
+          pytest tests/test_bedrock_nova_micro.py::TestWritingAssessmentEvaluation::test_academic_task1_evaluation -v
+          echo "✅ Academic Task 1 evaluation validated"
+      
+      - name: Test Writing Assessment Evaluation (Academic Task 2)
+        run: |
+          pytest tests/test_bedrock_nova_micro.py::TestWritingAssessmentEvaluation::test_academic_task2_evaluation -v
+          echo "✅ Academic Task 2 evaluation validated"
+      
+      - name: Test Writing Assessment Evaluation (General Task 1)
+        run: |
+          pytest tests/test_bedrock_nova_micro.py::TestWritingAssessmentEvaluation::test_general_task1_letter_evaluation -v
+          echo "✅ General Task 1 letter evaluation validated"
+      
+      - name: Test Reading Assessment Scoring
+        run: |
+          pytest tests/test_bedrock_nova_micro.py::TestReadingAssessmentEvaluation -v
+          echo "✅ Reading assessment validated"
+      
+      - name: Test Listening Assessment Scoring
+        run: |
+          pytest tests/test_bedrock_nova_micro.py::TestListeningAssessmentEvaluation -v
+          echo "✅ Listening assessment validated"
+      
+      - name: Test Cost Optimization (~$0.003 per assessment)
+        run: |
+          pytest tests/test_bedrock_nova_micro.py::TestCostOptimization -v
+          echo "✅ Nova Micro cost optimization validated"
+      
+      - name: Test AWS Bedrock Integration
+        run: |
+          pytest tests/test_bedrock_nova_micro.py::TestAWSBedrockIntegration -v
+          echo "✅ AWS Bedrock configuration validated"
+      
+      - name: Test Error Handling
+        run: |
+          pytest tests/test_bedrock_nova_micro.py::TestErrorHandling -v
+          echo "✅ Error handling validated"
+
   gemini-flash-tests:
     name: Gemini Flash & Flash Lite Model Tests
     runs-on: ubuntu-latest
@@ -353,7 +417,7 @@ jobs:
   test-summary:
     name: Comprehensive Test Summary
     runs-on: ubuntu-latest
-    needs: [unit-and-integration-tests, security-and-compliance, lambda-handler-validation, gemini-flash-tests, end-to-end-tests, api-validation, mobile-build-validation, code-quality]
+    needs: [unit-and-integration-tests, security-and-compliance, lambda-handler-validation, bedrock-nova-micro-tests, gemini-flash-tests, end-to-end-tests, api-validation, mobile-build-validation, code-quality]
     if: always()
     
     steps:
@@ -368,6 +432,7 @@ jobs:
           echo "| Unit & Integration Tests | ${{ needs.unit-and-integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Security & Compliance | ${{ needs.security-and-compliance.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Lambda Handler | ${{ needs.lambda-handler-validation.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| AWS Bedrock Nova Micro | ${{ needs.bedrock-nova-micro-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Gemini Flash & Flash Lite | ${{ needs.gemini-flash-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| End-to-End Tests | ${{ needs.end-to-end-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| API Validation | ${{ needs.api-validation.result }} |" >> $GITHUB_STEP_SUMMARY
